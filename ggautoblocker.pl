@@ -6,12 +6,6 @@ use Net::Twitter;
 
 # Needs read/write access!
 
-my $consumer_key = "";
-my $consumer_secret = "";
-
-my $access_token = "";
-my $access_secret = "";
-
 my $sourcelist_file = "sourcelist.txt";
 my $whitelist_file = "whitelist.txt";
 
@@ -23,16 +17,26 @@ my %problem;
 
 my ( @follower_ids, @myfollower_ids, @sheeple_ids );
 
+# check to see if our access tokens are configured properly
+if ( (!defined($ENV{'TWITTER_CONSUMER_KEY'})) ||
+   (!defined($ENV{TWITTER_CONSUMER_SECRET})) ||
+   (!defined($ENV{TWITTER_ACCESS_TOKEN})) ||
+   (!defined($ENV{TWITTER_ACCESS_TOKEN_SECRET})) ) {
+  
+  print "Twitter access keys in your environment don't seem to be set\n";
+  print "correctly. Please see the Twitter API page for more info.\n";
+  exit 1;
+}
 
 # set up our twitter connection
 
 my $nt = Net::Twitter->new(
-	traits			=> [qw/API::RESTv1_1/],
-	ssl			=> 1,
-	consumer_key		=> $consumer_key,
-	consumer_secret		=> $consumer_secret,
-	access_token		=> $access_token,
-	access_token_secret	=> $access_secret
+	traits			        => [qw/API::RESTv1_1/],
+	ssl			            => 1,
+	consumer_key		    => $ENV{'TWITTER_CONSUMER_KEY'},
+	consumer_secret		  => $ENV{'TWITTER_CONSUMER_SECRET'},
+	access_token	 	    => $ENV{TWITTER_ACCESS_TOKEN},
+	access_token_secret	=> $ENV{TWITTER_ACCESS_TOKEN_SECRET}
 );
 
 
