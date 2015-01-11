@@ -10,6 +10,7 @@ my $sourcelist_file = "sourcelist.txt";
 my $whitelist_file = "whitelist.txt";
 
 my $debug = 1;
+my $follower_limit = 500;
 
 my ( @whitelist, @idiots );
 
@@ -23,19 +24,19 @@ if ( (!defined($ENV{'TWITTER_CONSUMER_KEY'})) ||
    (!defined($ENV{TWITTER_ACCESS_TOKEN})) ||
    (!defined($ENV{TWITTER_ACCESS_TOKEN_SECRET})) ) {
   
-  print "Twitter access keys in your environment don't seem to be set\n";
-  print "correctly. Please see the Twitter API page for more info.\n";
-  exit 1;
+	print "Twitter access keys in your environment don't seem to be set\n";
+	print "correctly. Please see the Twitter API page for more info.\n";
+	exit 1;
 }
 
 # set up our twitter connection
 
 my $nt = Net::Twitter->new(
-	traits			        => [qw/API::RESTv1_1/],
-	ssl			            => 1,
-	consumer_key		    => $ENV{'TWITTER_CONSUMER_KEY'},
-	consumer_secret		  => $ENV{'TWITTER_CONSUMER_SECRET'},
-	access_token	 	    => $ENV{TWITTER_ACCESS_TOKEN},
+	traits              => [qw/API::RESTv1_1/],
+	ssl                 => 1,
+	consumer_key        => $ENV{'TWITTER_CONSUMER_KEY'},
+	consumer_secret     => $ENV{'TWITTER_CONSUMER_SECRET'},
+	access_token        => $ENV{TWITTER_ACCESS_TOKEN},
 	access_token_secret	=> $ENV{TWITTER_ACCESS_TOKEN_SECRET}
 );
 
@@ -72,6 +73,7 @@ sub wait_for_rate_limit {
 	my $type = shift;
 
 	my $limit = get_rate_limit($type);
+	print "limit: $limit->{remaining}\n" if $debug;
 
 	if ( $limit->{'remaining'} == 0 ) {
 		print " -- API limit reached, waiting for ". ( $limit->{'reset'} - time ) . " seconds --\n" if $debug;
@@ -92,9 +94,16 @@ sub get_followers {
 			$r = $nt->followers_ids({ screen_name => $screen_name, cursor => $cursor });
 		} else {
 			$r = $nt->followers_ids({ cursor => $cursor });
-		}	
+		}
 
 		push @followers, @{$r->{ids}};
+		print "# of followers pulled: $#followers\n" if $debug;
+ 
+		# limiting the number of followers we pull from each account to have
+		# a shorter run for debuggingi
+		if ($follower_limit > 0 && $debug && $#followers > $follower_limit) {
+			last;
+		}
 	}
 
 	return @followers;
