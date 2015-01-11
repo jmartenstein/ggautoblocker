@@ -201,9 +201,7 @@ if ( $debug ) {
 	print "Saving list of IDs to block_ids.txt.\n";
 	open BL, '>block_ids.txt' or die "Can't open block_ids.txt: $!\n";
 	foreach my $monster ( keys %problem ) {
-		if ( $problem{$monster}->{'count'} == 1 ) {
-			delete $problem{$monster};
-		} else {
+		if ( exists $problem{$monster}->{'count'} ) {
 			print BL "$monster\n";
 		}
 	}
