@@ -100,7 +100,7 @@ sub get_followers {
 		print "# of followers pulled: $#followers\n" if $debug;
  
 		# limiting the number of followers we pull from each account to have
-		# a shorter run for debuggingi
+		# a shorter run for debugging
 		if ($follower_limit > 0 && $debug && $#followers > $follower_limit) {
 			last;
 		}
